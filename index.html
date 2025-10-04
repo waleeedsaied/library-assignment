@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waleed BA Library</title>
+    <style>
+        :root {
+            --primary-bg: #1a1d24;
+            --card-bg: #2d313a;
+            --accent: #4a90e2;
+            --text: #e0e0e0;
+            --warning: #ff4444;
+            --success: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--primary-bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        /* User Profile Section */
+        .profile-section {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .borrowed-books-list {
+            margin-top: 1rem;
+        }
+
+        .borrowed-item {
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Search Bar */
+        .search-section {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+        }
+
+        /* Book Grid */
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .book-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .book-category {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .book-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .book-author {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        button:hover:not(:disabled) {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .availability {
+            color: var(--success);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .warning {
+            color: var(--warning);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .book-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 0.5rem;
+        }
+
+        /* Admin Dashboard */
+        .admin-dashboard {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-section {
+                position: static;
+            }
+            
+            .book-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Waleed BA Library Management System</h1>
+            <p>Your gateway to knowledge and learning resources</p>
+        </div>
+
+        <!-- User Profile -->
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <h3>John Doe</h3>
+                <p>Library Member</p>
+                <small>Member since: 2022</small>
+            </div>
+            <div class="borrowed-books">
+                <h4>📖 Currently Borrowed (2/3)</h4>
+                <div class="borrowed-books-list">
+                    <div class="borrowed-item">
+                        <div><strong>Clean Code</strong></div>
+                        <div>Due: 2023-11-15</div>
+                        <div class="warning">⏰ Fine: $4</div>
+                    </div>
+                    <div class="borrowed-item">
+                        <div><strong>The Great Gatsby</strong></div>
+                        <div>Due: 2023-11-18</div>
+                        <div class="availability">✅ No fines</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="🔍 Search for books, authors, or categories...">
+                    <button onclick="searchBooks()">Search</button>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterBooks('all')">All Books</button>
+                    <button class="filter-btn" onclick="filterBooks('technology')">Technology</button>
+                    <button class="filter-btn" onclick="filterBooks('fiction')">Fiction</button>
+                    <button class="filter-btn" onclick="filterBooks('business')">Business</button>
+                    <button class="filter-btn" onclick="filterBooks('available')">Available Now</button>
+                </div>
+            </div>
+
+            <!-- Book Grid -->
+            <div class="book-grid" id="bookGrid">
+                <!-- Books will be dynamically loaded here -->
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+                <h2>📊 Admin Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Books</h3>
+                        <p>8,542</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Borrowed Books</h3>
+                        <p>289</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Reservations</h3>
+                        <p>67</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Fines</h3>
+                        <p>$1,234</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Library Data
+        const libraryBooks = [
+            {
+                id: 1,
+                title: "The Great Gatsby",
+                author: "F. Scott Fitzgerald",
+                category: "fiction",
+                cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
+                isbn: "978-0-7432-7356-5",
+                status: "borrowed",
+                dueDate: "2023-11-18"
+            },
+            {
+                id: 2,
+                title: "Clean Code",
+                author: "Robert C. Martin",
+                category: "technology",
+                cover: "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=400",
+                isbn: "978-0-13-235088-4",
+                status: "borrowed",
+                dueDate: "2023-11-15"
+            },
+            {
+                id: 3,
+                title: "Dune",
+                author: "Frank Herbert",
+                category: "fiction",
+                cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400",
+                isbn: "978-0-441-17271-9",
+                status: "available"
+            },
+            {
+                id: 4,
+                title: "The Lean Startup",
+                author: "Eric Ries",
+                category: "business",
+                cover: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400",
+                isbn: "978-0-307-88789-4",
+                status: "available"
+            },
+            {
+                id: 5,
+                title: "Thinking Fast and Slow",
+                author: "Daniel Kahneman",
+                category: "psychology",
+                cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
+                isbn: "978-0-374-27563-1",
+                status: "available"
+            },
+            {
+                id: 6,
+                title: "The Hobbit",
+                author: "J.R.R. Tolkien",
+                category: "fiction",
+                cover: "https://images.unsplash.com/photo-1621351183012-e2f9972dd9bf?w=400",
+                isbn: "978-0-547-92822-7",
+                status: "available"
+            },
+            {
+                id: 7,
+                title: "The Pragmatic Programmer",
+                author: "Andrew Hunt & David Thomas",
+                category: "technology",
+                cover: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400",
+                isbn: "978-0-13-595705-9",
+                status: "available"
+            },
+            {
+                id: 8,
+                title: "Deep Work",
+                author: "Cal Newport",
+                category: "business",
+                cover: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400",
+                isbn: "978-1-4555-8633-7",
+                status: "available"
+            }
+        ];
+
+        // Library Management System
+        const librarySystem = {
+            borrowedBooks: [1, 2], // IDs of borrowed books
+            reservations: [],
+            maxBorrowLimit: 3,
+            
+            init: function() {
+                this.renderBooks();
+                this.setupEventListeners();
+            },
+            
+            renderBooks: function(filter = 'all') {
+                const bookGrid = document.getElementById('bookGrid');
+                bookGrid.innerHTML = '';
+                
+                const filteredBooks = libraryBooks.filter(book => {
+                    if (filter === 'all') return true;
+                    if (filter === 'available') return book.status === 'available';
+                    return book.category === filter;
+                });
+                
+                filteredBooks.forEach(book => {
+                    const isBorrowed = this.borrowedBooks.includes(book.id);
+                    const bookCard = this.createBookCard(book, isBorrowed);
+                    bookGrid.appendChild(bookCard);
+                });
+            },
+            
+            createBookCard: function(book, isBorrowed) {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.innerHTML = `
+                    <div class="book-category">${book.category.toUpperCase()}</div>
+                    <div class="book-cover" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    <h3 class="book-title">${book.title}</h3>
+                    <div class="book-author">by ${book.author}</div>
+                    <div class="book-stats">
+                        <span>ISBN: ${book.isbn}</span>
+                    </div>
+                    <div class="book-actions">
+                        <button onclick="librarySystem.borrowBook(${book.id})" ${isBorrowed ? 'disabled' : ''}>
+                            ${isBorrowed ? '✓ Borrowed' : '📚 Borrow'}
+                        </button>
+                        <button class="btn-secondary" onclick="librarySystem.reserveBook(${book.id})">
+                            ⏰ Reserve
+                        </button>
+                    </div>
+                    ${isBorrowed ? 
+                        `<div class="warning">Due: ${book.dueDate}</div>` : 
+                        `<div class="availability">✅ Available</div>`
+                    }
+                `;
+                return card;
+            },
+            
+            borrowBook: function(bookId) {
+                if (this.borrowedBooks.length >= this.maxBorrowLimit) {
+                    alert(`You have reached the maximum borrowing limit of ${this.maxBorrowLimit} books.`);
+                    return;
+                }
+                
+                this.borrowedBooks.push(bookId);
+                const book = libraryBooks.find(b => b.id === bookId);
+                book.status = 'borrowed';
+                book.dueDate = this.calculateDueDate();
+                
+                alert(`Successfully borrowed: "${book.title}"\nDue date: ${book.dueDate}`);
+                this.renderBooks();
+                this.updateBorrowedList();
+            },
+            
+            reserveBook: function(bookId) {
+                const book = libraryBooks.find(b => b.id === bookId);
+                this.reservations.push(bookId);
+                alert(`Reserved: "${book.title}"\nYou will be notified when available.`);
+            },
+            
+            calculateDueDate: function() {
+                const dueDate = new Date();
+                dueDate.setDate(dueDate.getDate() + 14); // 2 weeks from now
+                return dueDate.toISOString().split('T')[0];
+            },
+            
+            updateBorrowedList: function() {
+                // In a real app, this would update the UI
+                console.log('Borrowed books updated:', this.borrowedBooks);
+            },
+            
+            setupEventListeners: function() {
+                // Search functionality
+                const searchInput = document.querySelector('.search-input');
+                searchInput.addEventListener('input', (e) => {
+                    this.searchBooks(e.target.value);
+                });
+                
+                // Filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                    });
+                });
+                
+                // Admin dashboard shortcut
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'a') {
+                        e.preventDefault();
+                        this.toggleAdminView();
+                    }
+                });
+            },
+            
+            searchBooks: function(query) {
+                const filteredBooks = libraryBooks.filter(book => 
+                    book.title.toLowerCase().includes(query.toLowerCase()) ||
+                    book.author.toLowerCase().includes(query.toLowerCase()) ||
+                    book.category.toLowerCase().includes(query.toLowerCase())
+                );
+                
+                const bookGrid = document.getElementById('bookGrid');
+                bookGrid.innerHTML = '';
+                
+                filteredBooks.forEach(book => {
+                    const isBorrowed = this.borrowedBooks.includes(book.id);
+                    const bookCard = this.createBookCard(book, isBorrowed);
+                    bookGrid.appendChild(bookCard);
+                });
+            },
+            
+            toggleAdminView: function() {
+                const adminDashboard = document.getElementById('adminDashboard');
+                adminDashboard.style.display = adminDashboard.style.display === 'none' ? 'block' : 'none';
+            }
+        };
+
+        // Initialize the library system when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            librarySystem.init();
+        });
+
+        // Global filter function for buttons
+        function filterBooks(category) {
+            librarySystem.renderBooks(category);
+        }
+
+        // Global search function
+        function searchBooks() {
+            const query = document.querySelector('.search-input').value;
+            librarySystem.searchBooks(query);
+        }
+    </script>
+</body>
+</html>
